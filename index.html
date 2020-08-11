@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./node_modules/cropperjs/dist/cropper.min.css">
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="./node_modules/jquery/dist/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script src="./node_modules/cropperjs/dist/cropper.min.js"></script>
+    <style>
+        .title {
+            font-size: 30px;
+            text-align: center
+        }
+
+        img {
+            display: block;
+            max-width: 100%
+        }
+
+        section {
+            margin: 200px auto;
+            width: 1000px;
+            height: 600px;
+        }
+
+        #preview {
+            position: absolute;
+            right: 30px;
+            top: 30px;
+            overflow: hidden;
+            width: 200px;
+            height: 200px
+        }
+
+        .base64 {
+            width: 100px;
+            height: 100px;
+            overflow: hidden
+        }
+    </style>
+</head>
+<body>
+<h1 class="title">cropper-demo</h1>
+<div class="base64">
+    <img src="" alt="" id="base64">
+</div>
+<div id="preview"></div>
+<section>
+    <input type="file" id="file" accept="image/png, image/jpeg">
+    <img src="" alt="" id="image">
+</section>
+<footer>
+    <button id="reset" type="button" class="btn btn-danger">重置</button>
+    <button id="rotate" type="button" class="btn btn-primary">翻转</button>
+    <button id="zoomIn" type="button" class="btn btn-success">放大</button>
+    <button id="zoomOut" type="button" class="btn btn-warning">缩小</button>
+    <button id="upload" type="button" class="btn btn-warning">上传</button>
+</footer>
+<!--  script  -->
+<script>
+    const url = 'http://192.168.1.150:8080/jeecg'
+    const image = document.getElementById('image')
+    const rotate = document.getElementById('rotate')
+    const zoomIn = document.getElementById('zoomIn')
+    const zoomOut = document.getElementById('zoomOut')
+    const reset = document.getElementById('reset')
+    const file = document.getElementById('file')
+    const upload = document.getElementById('upload')
+    window.cropper = null
+    // 选择文件
+    bindEvent(file, 'change', e => {
+        changeImage(e, image)
+    })
+
+    // 初始化裁剪
+    cropperInit(image)
+
+    // 上传文件
+    bindEvent(upload, 'click', e => {
+        const base64 = window.cropper.getCroppedCanvas().toDataURL()
+        $.ajax({
+            url: url + '/systemController.do?doUpdateLogo',
+            type: 'POST',
+            data: {
+                base64Data: encodeURIComponent(base64),
+                slogan: '测试'
+            },
+            dataType: 'json',
+            success: function(data) {
+                console.log(data)
+            },
+            error: function(err) {
+                console.log(err)
+            }
+        })
+    })
+
+    /**
+     *
+     * @param el 绑定元素
+     * @param type 时间类型
+     * @param fn 处理程序
+     */
+    function bindEvent(el, type, fn) {
+        el.addEventListener(type, fn, false)
+    }
+
+    /**
+     * changeImage 选择文件
+     */
+    function changeImage(e, image) {
+        const file = e.target.files[0]
+        var fileReader = new FileReader()
+        fileReader.readAsDataURL(file)
+        fileReader.onload = () => {
+            var _src = fileReader.result
+            image.src = _src
+            window.cropper.replace(_src)
+        }
+    }
+
+    function cropperInit(image) {
+        window.cropper = new Cropper(image, {
+            aspectRatio: 1 / 1,
+            autoCropArea: 0.8,
+            autoCrop: false,
+            preview: document.getElementById('preview'),
+            ready() {
+                this.cropper.crop()
+                bindEvent(zoomIn, 'click', () => {
+                    this.cropper.zoom(0.1)
+                })
+                bindEvent(zoomOut, 'click', () => {
+                    this.cropper.zoom(-0.1)
+                })
+                bindEvent(rotate, 'click', () => {
+                    this.cropper.rotate(45)
+                })
+                bindEvent(reset, 'click', () => {
+                    this.cropper.reset()
+                })
+            }
+        })
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "cropper-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pray-lee/cropper_demo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pray-lee/cropper_demo/issues"
+  },
+  "homepage": "https://github.com/pray-lee/cropper_demo#readme",
+  "dependencies": {
+    "cropperjs": "^1.5.7",
+    "jquery": "^3.5.1"
+  }
+}
